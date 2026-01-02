@@ -1,0 +1,12 @@
+[project]
+name = "1-add-a2a"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "geopy>=2.4.1",
+    "google-adk[a2a]>=1.21.0",
+    "pytz>=2025.2",
+    "timezonefinder>=8.2.0",
+]
