@@ -74,3 +74,13 @@ This command will launch the web UI for the client agent. Once it's ready, you c
 > "What time is it in Tokyo?"
 
 The `root_agent` (your `test_client_agent`) will receive this request, recognize it needs time information, and delegate the task to the `remote_time_agent` running on port 8001.
+
+## Design Desicions
+
+ADK supports two ways of exposing an agent via A2A:
+
+1. to_a2a()
+2. By creating your own agent card (agent.json) and hosting it using adk api_server --a2a
+
+I chose #2 because I wanted to use ADK Web to debug my remote agent. This isn't the most important decision, but I do recommend explicitly defining your AgentCard rather than relying on the automated feature to generate one for you based on the metadata.
+Read more [here](https://google.github.io/adk-docs/a2a/quickstart-exposing/).
