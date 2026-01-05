@@ -1,6 +1,26 @@
 from google.adk.agents.llm_agent import Agent
 from google.adk.agents.remote_a2a_agent import AGENT_CARD_WELL_KNOWN_PATH
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
+from google.adk.auth import auth_credential
+import os
+
+OKTA_CLIENT_ID = os.environ.get("OKTA_CLIENT_ID")
+OKTA_CLIENT_SECRET = os.environ.get("OKTA_CLIENT_SECRET")
+
+if not OKTA_CLIENT_ID or not OKTA_CLIENT_SECRET:
+    raise ValueError(
+        "Please set OKTA_CLIENT_ID and OKTA_CLIENT_SECRET environment variables"
+    )
+
+# This credential object is used by the ADK framework (when running adk web)
+# to interact with your Okta authorization server.
+auth_cred = auth_credential.AuthCredential(
+    auth_type=auth_credential.AuthCredentialTypes.OPEN_ID_CONNECT,
+    oauth2=auth_credential.OAuth2Auth(
+        client_id=OKTA_CLIENT_ID,
+        client_secret=OKTA_CLIENT_SECRET,
+    ),
+)
 
 get_time_agent = RemoteA2aAgent(
     name="time_agent",
@@ -8,6 +28,7 @@ get_time_agent = RemoteA2aAgent(
     agent_card=
     (f"http://localhost:8001/a2a/remote_time_agent{AGENT_CARD_WELL_KNOWN_PATH}"
      ),
+    auth_credential=auth_cred,
 )
 
 root_agent = Agent(
