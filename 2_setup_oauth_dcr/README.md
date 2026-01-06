@@ -1,4 +1,4 @@
-1. Set up two Okta apps. One to be the Oauth for agent access, the other to access the Okta API (for token introspection).
+1. Set up two Okta apps. One to be the Oauth for end user agent access, the other to access the Okta API (for token introspection) - resource server.
 2. Modify AgentCard to include SecuritySchema
 3. Create custom a2a server to support best practices for Oauth with A2A.
 4. Modify the test client to support authenticated calls to remote agent
@@ -6,6 +6,12 @@
 ## 1 - Okta App Setup
 
 Okta App for Agent to retrieve end user credentials:
+Missing or Inactive Access Policy: If you are using a Custom Authorization Server (issuer URL includes /oauth2/default or another ID), it must have an active Access Policy that includes your specific application.
+Fix: Go to Security > API > Authorization Servers, select your server, and ensure an active policy exists under the Access Policies tab with a rule that permits your app.
+Unauthorized Scopes: The request may be asking for scopes (e.g., groups, offline_access) that are not explicitly allowed in your Authorization Server's access rules.
+Fix: In the Access Rules of your policy, verify that the Scopes requested section is set to "Any scopes" or specifically lists the ones your app is sending.
+
+Need to define custom auth server so that we can support custom scope read:time.
 
 1. Log in to your Okta Admin Console.
 2. Navigate to Applications > Applications.
@@ -59,3 +65,11 @@ Rate limiting.
 Enhanced logging and monitoring.
 Request/response transformation.
 Token caching strategies to reduce introspection calls to Okta.
+
+Next:
+
+- test the configuration.
+  - add .env variables
+  - start a2a server
+  - run client agent
+  -

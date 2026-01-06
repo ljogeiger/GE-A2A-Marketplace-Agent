@@ -17,16 +17,16 @@
       ]
     }
   ],
-  "url": "http://localhost:8001/a2a/remote_time_agent",
+  "url": "http://localhost:8001/a2a/remote_time_agent/",
   "version": "1.0.0",
   "securitySchemes": {
     "oauth2": {
       "type": "oauth2",
       "flows": {
         "authorizationCode": {
-          "authorizationUrl": "https://trial-6400907.okta.com/oauth2/v1/authorize",
-          "tokenUrl": "https://trial-6400907.okta.com/oauth2/v1/token",
-          "refreshUrl": "https://trial-6400907.okta.com/oauth2/v1/token",
+          "authorizationUrl": "https://trial-6400907.okta.com/oauth2/ausyxkfala0nH5HxE697/v1/authorize",
+          "tokenUrl": "https://trial-6400907.okta.com/oauth2/ausyxkfala0nH5HxE697/v1/token",
+          "refreshUrl": "https://trial-6400907.okta.com/oauth2/ausyxkfala0nH5HxE697/v1/token",
           "scopes": {
             "agent:time": "Get the current time from the agent.",
             "openid": "Basic user profile"
