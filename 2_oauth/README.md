@@ -66,10 +66,7 @@ Enhanced logging and monitoring.
 Request/response transformation.
 Token caching strategies to reduce introspection calls to Okta.
 
-Next:
-
-- test the configuration.
-  - add .env variables
-  - start a2a server
-  - run client agent
-  -
+Run:
+uv run test_client_agent/agent.py
+and
+uv run uvicorn agent:app --host 0.0.0.0 --port 8001
