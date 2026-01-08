@@ -14,3 +14,7 @@ wheels/
 
 # ADK specific files
 .adk
+
+# DCR specific files
+clients_db.json
+dpop_private_key.pem
