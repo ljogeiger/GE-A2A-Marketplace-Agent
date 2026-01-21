@@ -1,0 +1,8 @@
+.git
+.gitignore
+__pycache__/
+*.pyc
+.env
+.DS_Store
+test-dcr/
+clients_db.json

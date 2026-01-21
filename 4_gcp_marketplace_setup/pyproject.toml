@@ -1,0 +1,21 @@
+[project]
+name = "marketplace-agent"
+version = "0.1.0"
+description = "GCP Marketplace Agent"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "google-auth",
+    "google-cloud-pubsub",
+    "pydantic",
+    "python-jose",
+    "cryptography",
+    "python-dotenv",
+    "requests",
+    "pytest",
+    "google-cloud-iam>=2.21.0",
+]
+    

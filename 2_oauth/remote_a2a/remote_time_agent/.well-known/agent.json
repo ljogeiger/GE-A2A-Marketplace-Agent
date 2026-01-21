@@ -4,6 +4,7 @@
   "defaultOutputModes": ["application/json"],
   "description": "An agent specialized in retrieving the current time in a specified city.",
   "name": "remote_time_agent",
+  "protocolVersion": "0.3.0",
   "skills": [
     {
       "id": "time_retrieval",
