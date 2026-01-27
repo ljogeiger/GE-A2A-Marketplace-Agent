@@ -46,6 +46,23 @@ This flow happens when the user (or admin) actually configures/starts the Agent 
 
 Before touching any code, you must configure the "Business" side in the [Google Cloud Partner Portal](https://producerportal.google.com/).
 
+### 2.1 Automatic Account and Entitlement Approval (Recommended)
+
+To streamline the customer procurement process, it is highly recommended to enable automatic approval for both accounts and entitlements. This ensures that once a customer purchases your application on Google Cloud Marketplace, their account and entitlements are automatically provisioned without manual intervention.
+
+**How it Works:**
+
+-   When automatic approval is enabled, the Google Partner Procurement API automatically approves the customer's account and any associated entitlements upon purchase.
+-   This significantly reduces the time from purchase to activation, improving the customer experience.
+
+**Configuration in Partner Portal:**
+
+This setting is typically configured within the "Technical Integration" section of your solution in the [Google Cloud Producer Portal](https://producerportal.google.com/). Look for options related to "Approval Mechanism" or "Automatic Approvals."
+
+For more detailed information, refer to the official Google Cloud Marketplace documentation on automatic approval:
+
+[Automatic Approval for Accounts and Entitlements](https://docs.cloud.google.com/marketplace/docs/partners/offers/automatic-approval)
+
 ### Steps
 
 1.  **Create Solution**: Set up your solution listing.
