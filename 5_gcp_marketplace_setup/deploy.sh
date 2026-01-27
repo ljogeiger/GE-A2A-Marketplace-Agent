@@ -10,9 +10,10 @@ SUB_NAME="marketplace-order-sub"
 SA_KEY_FILE="/Users/lukasgeiger/Desktop/GE_A2A_Marketplace_Agent/5_gcp_marketplace_setup/cpe-isv-partner-experiments-80bda91e2f1c.json"
 
 echo "Deploying Cloud Run service: $SERVICE_NAME..."
+
 # Note: Ensure that the 'okta-domain' and 'okta-api-token' secrets exist in Secret Manager
 # and the Service Account has 'Secret Manager Secret Accessor' role.
-# Allow unauthenticated because DCR verifies the software statement JWT itself?
+# We mount the NFS share to /mnt/filestore
 gcloud run deploy $SERVICE_NAME \
   --source . \
   --region $REGION \
@@ -26,6 +27,24 @@ SERVICE_URL=$(gcloud run services describe $SERVICE_NAME --region $REGION --form
 echo "Service deployed at: $SERVICE_URL"
 
 echo "Setting up permissions..."
+# Grant the Cloud Run Service Account access to Firestore (Datastore User)
+echo "Granting 'roles/datastore.user' to $RUN_SERVICE_ACCOUNT..."
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+    --member="serviceAccount:$RUN_SERVICE_ACCOUNT" \
+    --role="roles/datastore.user"
+
+# Grant Vertex AI User role
+echo "Granting 'roles/aiplatform.user' to $RUN_SERVICE_ACCOUNT..."
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+    --member="serviceAccount:$RUN_SERVICE_ACCOUNT" \
+    --role="roles/aiplatform.user"
+
+# Grant Secret Manager Secret Accessor role
+echo "Granting 'roles/secretmanager.secretAccessor' to $RUN_SERVICE_ACCOUNT..."
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+    --member="serviceAccount:$RUN_SERVICE_ACCOUNT" \
+    --role="roles/secretmanager.secretAccessor"
+
 # Grant the Pub/Sub Service Account permission to invoke the Cloud Run service
 gcloud run services add-iam-policy-binding $SERVICE_NAME \
   --region $REGION \

@@ -109,13 +109,6 @@ async def approve_account(payload: dict):
                 f"Failed to process account approval for {resource_name}: {e}")
             raise HTTPException(status_code=400,
                                 detail=f"Account approval failed: {str(e)}")
-            # We log but do not raise, so flow can continue if needed.
-
-            # However, if account isn't active, subsequent steps might fail?
-
-            # DCR doesn't strictly depend on Account Active status in this code,
-
-            # but business logic might. We'll proceed.
 
 
 # --- Models ---
@@ -196,7 +189,8 @@ async def handle_event(request: Request):
         logger.info(f"DCR Request for Order ID: {order_id}")
 
         # Check DB
-        logger.info(f"Looking up client for order_id: {order_id} in database...")
+        logger.info(
+            f"Looking up client for order_id: {order_id} in database...")
         existing_client = find_client_by_order_id(order_id)
         if existing_client:
             logger.info(f"Returning existing client for order {order_id}")
@@ -235,8 +229,7 @@ async def handle_event(request: Request):
                 "Detected ACCOUNT_CREATION_REQUESTED. Checking status...")
             await approve_account(payload)
 
-        # TODO: Check type of entlitnement request by status.
-        # TODO: Handle entitlment cancallation (deprovision client id/secret) in Okta.
+        # TODO: Handle entitlement cancellation (deprovision client id/secret) in Okta.
 
         # Extract Order ID.
         order_id = (payload.get("entitlement", {}).get("orderId")

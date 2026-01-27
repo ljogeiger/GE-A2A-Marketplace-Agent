@@ -9,9 +9,9 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies.
-# We use pip to install the package defined in pyproject.toml
+COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir .
+    pip install --no-cache-dir -r requirements.txt
 
 # Run the web service on container startup.
 # We use the PORT environment variable defined by Cloud Run (default 8080).

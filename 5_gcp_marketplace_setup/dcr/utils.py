@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from fastapi import HTTPException
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from google.cloud import firestore
 
 # --- Logger ---
 logger = logging.getLogger(__name__)
@@ -14,7 +15,18 @@ logger = logging.getLogger(__name__)
 # --- Configuration ---
 OKTA_DOMAIN = os.environ.get("OKTA_DOMAIN")
 OKTA_API_TOKEN = os.environ.get("OKTA_API_TOKEN")
-DB_FILE = "clients_db.json"
+
+# Firestore Configuration
+# We assume the default project credentials are sufficient.
+# Collection name to store client mappings
+COLLECTION_NAME = "marketplace_clients"
+
+# Initialize Firestore Client
+try:
+    db = firestore.Client()
+except Exception as e:
+    logger.warning(f"Could not initialize Firestore client. Ensure GOOGLE_APPLICATION_CREDENTIALS are set if running locally. Error: {e}")
+    db = None
 
 # JWT Configuration (i.e JWT audience)
 PROVIDER_URL = os.environ.get("PROVIDER_URL", "https://google.com")
@@ -34,35 +46,44 @@ class ClientRecord(BaseModel):
     client_secret: str
 
 
-# --- DB Functions ---
-def load_db() -> Dict[str, ClientRecord]:
-    if not os.path.exists(DB_FILE): return {}
-    try:
-        with open(DB_FILE, 'r') as f:
-            data = json.load(f)
-        return {k: ClientRecord(**v) for k, v in data.items()}
-    except json.JSONDecodeError:
-        logger.warning(f"{DB_FILE} is corrupted.")
-        return {}
-
-
-def save_db(db: Dict[str, ClientRecord]):
-    with open(DB_FILE, 'w') as f:
-        json.dump({k: v.dict() for k, v in db.items()}, f, indent=2)
-
+# --- DB Functions (Firestore) ---
 
 def find_client_by_order_id(order_id: str) -> Optional[ClientRecord]:
-    db = load_db()
-    logger.info(f"Checking DB for order {order_id}. Available orders: {list(db.keys())}")
-    return db.get(order_id)
+    if not db:
+        logger.error("Firestore client is not initialized.")
+        return None
+    
+    logger.info(f"Checking Firestore for order {order_id}...")
+    try:
+        doc_ref = db.collection(COLLECTION_NAME).document(order_id)
+        doc = doc_ref.get()
+        if doc.exists:
+            data = doc.to_dict()
+            logger.info(f"Found client record for order {order_id}")
+            return ClientRecord(**data)
+        else:
+            logger.info(f"No client record found for order {order_id}")
+            return None
+    except Exception as e:
+        logger.error(f"Error querying Firestore for order {order_id}: {e}")
+        return None
 
 
 def save_client_mapping(order_id: str, client_id: str, client_secret: str):
-    db = load_db()
-    db[order_id] = ClientRecord(order_id=order_id,
-                                client_id=client_id,
-                                client_secret=client_secret)
-    save_db(db)
+    if not db:
+        logger.error("Firestore client is not initialized. Cannot save mapping.")
+        return
+
+    logger.info(f"Saving client mapping for order {order_id} to Firestore...")
+    try:
+        doc_ref = db.collection(COLLECTION_NAME).document(order_id)
+        record = ClientRecord(order_id=order_id,
+                              client_id=client_id,
+                              client_secret=client_secret)
+        doc_ref.set(record.dict())
+        logger.info(f"Successfully saved client mapping for {order_id}")
+    except Exception as e:
+        logger.error(f"Error saving to Firestore for order {order_id}: {e}")
 
 
 # --- JWT Validation ---
@@ -147,7 +168,8 @@ async def register_okta_client(order_id: str,
         "redirect_uris": redirect_uris,
         "response_types": ["code"],
         "grant_types": ["authorization_code", "refresh_token"],
-        "token_endpoint_auth_method": "client_secret_post"
+        "token_endpoint_auth_method": "client_secret_post",
+        "scope": "openid profile email offline_access"
     }
     okta_dcr_url = f"{OKTA_DOMAIN}/oauth2/v1/clients"
     logger.info(f"Registering Okta client at: {okta_dcr_url}")
