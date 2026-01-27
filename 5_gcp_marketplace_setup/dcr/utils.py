@@ -25,7 +25,9 @@ COLLECTION_NAME = "marketplace_clients"
 try:
     db = firestore.Client()
 except Exception as e:
-    logger.warning(f"Could not initialize Firestore client. Ensure GOOGLE_APPLICATION_CREDENTIALS are set if running locally. Error: {e}")
+    logger.warning(
+        f"Could not initialize Firestore client. Ensure GOOGLE_APPLICATION_CREDENTIALS are set if running locally. Error: {e}"
+    )
     db = None
 
 # JWT Configuration (i.e JWT audience)
@@ -48,11 +50,12 @@ class ClientRecord(BaseModel):
 
 # --- DB Functions (Firestore) ---
 
+
 def find_client_by_order_id(order_id: str) -> Optional[ClientRecord]:
     if not db:
         logger.error("Firestore client is not initialized.")
         return None
-    
+
     logger.info(f"Checking Firestore for order {order_id}...")
     try:
         doc_ref = db.collection(COLLECTION_NAME).document(order_id)
@@ -71,7 +74,8 @@ def find_client_by_order_id(order_id: str) -> Optional[ClientRecord]:
 
 def save_client_mapping(order_id: str, client_id: str, client_secret: str):
     if not db:
-        logger.error("Firestore client is not initialized. Cannot save mapping.")
+        logger.error(
+            "Firestore client is not initialized. Cannot save mapping.")
         return
 
     logger.info(f"Saving client mapping for order {order_id} to Firestore...")
@@ -162,6 +166,8 @@ async def register_okta_client(order_id: str,
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
+    # NOTE: When you create the app you may want to include all users or specific users.
+    # We are not assigning users here, so will need to manage access via Okta UI.
     client_payload = {
         "client_name": f"Gemini Agent - Order {order_id}",
         "application_type": "web",

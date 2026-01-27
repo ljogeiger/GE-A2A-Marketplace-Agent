@@ -254,21 +254,7 @@ We have automated the infrastructure provisioning and deployment using shell scr
     ./deploy.sh
     ```
 
-### Local Development
-
-If you wish to run the service locally (e.g., to test the DCR endpoint):
-
-1.  **Install Dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-2.  **Run Locally**:
-    ```bash
-    export PORT=8080
-    # Set other necessary env vars (OKTA_DOMAIN, etc.) in a .env file or export them
-    uvicorn marketplace_handler:app --reload --port $PORT
-    ```
+Note: When testing this, make sure to add users to the newly created Okta app so they can log in via oauth.
 
 ---
 

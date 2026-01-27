@@ -19,38 +19,23 @@ echo "Deploying $SERVICE_NAME to Project: $PROJECT_ID"
 echo "Region: $REGION"
 echo "=================================================="
 
-# Prepare Environment Variables from .env
-echo "Reading .env file..."
-ENV_VARS=$(python3 -c "
-import sys
-import os
+# Prepare Configuration
+# We use Secret Manager for sensitive data and Env Vars for standard config
+echo "Configuring deployment arguments..."
 
-env_path = 'remote_a2a/remote_time_agent/.env'
-if os.path.exists(env_path):
-    try:
-        with open(env_path) as f:
-            lines = f.readlines()
-        pairs = []
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith('#'): continue
-            if '=' in line:
-                k, v = line.split('=', 1)
-                # Remove surrounding quotes
-                v = v.strip('\"\'')
-                pairs.append(f'{k}={v}')
-        print(','.join(pairs))
-    except Exception as e:
-        print('')
-else:
-    print('')
-")
+# 1. Secrets from Google Secret Manager
+# Ensure these secrets exist in your project:
+# - OKTA_DOMAIN
+# - OKTA_AUTH_SERVER_ID
+# - OKTA_RS_CLIENT_ID
+# - OKTA_RS_CLIENT_SECRET
+SECRETS_ARGS="--set-secrets=OKTA_DOMAIN=OKTA_DOMAIN:latest,OKTA_AUTH_SERVER_ID=OKTA_AUTH_SERVER_ID:latest,OKTA_RS_CLIENT_ID=OKTA_RS_CLIENT_ID:latest,OKTA_RS_CLIENT_SECRET=OKTA_RS_CLIENT_SECRET:latest"
 
-DEPLOY_ARGS=""
-if [ ! -z "$ENV_VARS" ]; then
-    DEPLOY_ARGS="--set-env-vars $ENV_VARS"
-    echo "Loaded environment variables from .env"
-fi
+# 2. Standard Environment Variables
+ENV_VARS_ARGS="--set-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=global,GOOGLE_GENAI_USE_VERTEXAI=True"
+
+# Combine for easier usage
+DEPLOY_ARGS="$SECRETS_ARGS $ENV_VARS_ARGS"
 
 # 1. Initial Build & Deploy to get the URL
 # We need to deploy first to let Cloud Run generate the deterministic URL for this service.
@@ -105,7 +90,7 @@ except Exception as e:
 # 4. Final Build & Deploy
 echo "[Step 3/3] Final Build & Deploy (with updated agent.json)..."
 gcloud builds submit remote_a2a --tag gcr.io/$PROJECT_ID/$SERVICE_NAME
-gcloud run deploy $SERVICE_NAME --image gcr.io/$PROJECT_ID/$SERVICE_NAME --platform managed --region $REGION --port 8001 --allow-unauthenticated $DEPLOY_ARGS --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID, GOOGLE_CLOUD_LOCATION=global, GOOGLE_GENAI_USE_VERTEXAI=True
+gcloud run deploy $SERVICE_NAME --image gcr.io/$PROJECT_ID/$SERVICE_NAME --platform managed --region $REGION --port 8001 --allow-unauthenticated $DEPLOY_ARGS
 
 echo "=================================================="
 echo "Deployment Complete!"

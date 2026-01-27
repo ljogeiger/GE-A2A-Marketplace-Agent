@@ -75,7 +75,9 @@ This command will launch the web UI for the client agent. Once it's ready, you c
 
 The `root_agent` (your `test_client_agent`) will receive this request, recognize it needs time information, and delegate the task to the `remote_time_agent` running on port 8001.
 
-## Design Desicions
+Note: please allow for the agent to respond before sending a follow up. This might take a few seconds. Otherwise you will receive wonky output.
+
+## Design Decisions
 
 ADK supports two ways of exposing an agent via A2A:
 

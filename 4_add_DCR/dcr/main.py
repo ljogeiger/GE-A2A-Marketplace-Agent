@@ -179,6 +179,8 @@ async def register_okta_client(order_id: str,
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
+    # NOTE: When you create the app you may want to include all users or specific users.
+    # We are not assigning users here, so will need to manage access via Okta UI.
     client_payload = {
         "client_name": f"Gemini Agent - Order {order_id}",
         "application_type": "web",

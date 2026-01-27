@@ -1,72 +1,261 @@
-1. Set up two Okta apps. One to be the Oauth for end user agent access, the other to access the Okta API (for token introspection) - resource server.
-2. Modify AgentCard to include SecuritySchema
-3. Create custom a2a server to support best practices for Oauth with A2A.
-4. Modify the test client to support authenticated calls to remote agent
+# A2A Agent with OAuth 2.0 Security (local)
 
-## 1 - Okta App Setup
+This project demonstrates a secure Agent-to-Agent (A2A) communication architecture using OAuth 2.0. It features a **Remote Time Agent** (Resource Server) that requires authentication and specific scopes to access, and a **Test Client Agent** that performs the OAuth dance to acquire a valid token before calling the remote agent.
 
-Okta App for Agent to retrieve end user credentials:
-Missing or Inactive Access Policy: If you are using a Custom Authorization Server (issuer URL includes /oauth2/default or another ID), it must have an active Access Policy that includes your specific application.
-Fix: Go to Security > API > Authorization Servers, select your server, and ensure an active policy exists under the Access Policies tab with a rule that permits your app.
-Unauthorized Scopes: The request may be asking for scopes (e.g., groups, offline_access) that are not explicitly allowed in your Authorization Server's access rules.
-Fix: In the Access Rules of your policy, verify that the Scopes requested section is set to "Any scopes" or specifically lists the ones your app is sending.
+## Overview
 
-Need to define custom auth server so that we can support custom scope read:time.
+The system consists of two main components:
 
-1. Log in to your Okta Admin Console.
-2. Navigate to Applications > Applications.
-3. Click on Create App Integration.
-   Select OIDC - OpenID Connect as the Sign-in method.
-   Choose Web Application as the Application type. Click Next.
-   App integration name: Give your application a descriptive name (e.g., "My AI Agent").
-   Grant type: Ensure Authorization Code is selected. This is the standard and most secure flow for this type of application. You may also need/want Refresh Token.
-   Sign-in redirect URIs: This is crucial for local testing. Add a URI like http://localhost:8080/callback or a similar path on your local machine where your agent will handle the OAuth callback. You can add more later for deployed environments.
-   Sign-out redirect URIs: (Optional for now) You can configure where to redirect after logout.
-   Assignments: Control which users or groups can use this application. Start with a test user or group.
-   Click Save.
+1.  **Remote Time Agent (Server)**: A FastAPI-based A2A server that hosts the "Time Agent". It uses middleware to intercept requests, validate OAuth tokens via Okta introspection, and enforce custom scopes (`agent:time`).
+2.  **Test Client Agent (Client)**: A CLI-based agent that:
+    - Fetches the `agent-card.json` to discover security requirements.
+    - Authenticates the user via Okta (Authorization Code flow).
+    - Uses the obtained access token to make authenticated requests to the Remote Time Agent.
 
-Okta App to for Agent Backend:
+## Design Decisions
 
-1. Log in to Okta Admin Console: Access your Okta administrative interface.
-   Create New App Integration:
-   Navigate to Applications > Applications.
-   Click on Create App Integration.
-   For the sign-in method, select OIDC - OpenID Connect.
-   For the Application type, choose API Services. This type is intended for machine-to-machine communication where the application needs to access Okta APIs directly.
-   Click Next.
-   Configure the Application:
-   App integration name: Give it a descriptive name, for example, "RemoteTimeAgent Service" or "A2A Agent Backend".
-   Click Save.
-   Client Credentials:
-   After saving, you'll find the Client ID and Client secret on the application's "General" tab. These are the values you will use for OKTA_RS_CLIENT_ID and OKTA_RS_CLIENT_SECRET in your FastAPI server's environment variables.
-   https://developer.okta.com/docs/api/openapi/okta-oauth/oauth/tag/CustomAS/#tag/CustomAS/operation/introspectCustomAS
-   Client Authentication for Introspection Call:
-   Your middleware code uses auth=(RESOURCE_SERVER_CLIENT_ID, RESOURCE_SERVER_CLIENT_SECRET) in the httpx.post call to the introspection endpoint. This typically means the client ID and secret are sent as an HTTP Basic Auth header. Ensure the "Client authentication" method for this Okta application is set to Client Secret (Basic). This is usually the default for API Services apps.
+### 1. Custom A2A Server (FastAPI)
 
-   we are using the default authorization server. otherwise we would have to specify which version.
+**Why?**
+Instead of embedding authentication logic directly into the agent's business logic, we wrap the agent in a custom FastAPI server. This allows us to use **Middleware** (`OAuthMiddleware`) as a centralized point of security enforcement.
 
-## Why a Custom A2A Server is Better for Production:
+- **Separation of Concerns**: The agent logic (`get_current_time`) remains pure and unaware of OAuth details.
+- **Security**: Authentication (Token Validity) and Authorization (Scopes) are enforced before the request ever reaches the agent executor.
 
-_Centralized Security Enforcement_: You can implement middleware (as in a FastAPI or Starlette application) to intercept all incoming requests to your agent's A2A endpoints. This middleware becomes the single point of control for:
+### 2. Two Distinct Okta Applications
 
-Extracting the Authorization: Bearer token.
-Validating the token with Okta (e.g., via introspection).
-Checking for the presence of required OAuth scopes based on the skill being invoked. Requests that fail validation are rejected before they reach the core ADK agent logic.
-Clear Separation of Concerns: The custom server approach separates the web serving, protocol handling (A2A), and security logic from the agent's skill implementations.
+**Why?**
+OAuth 2.0 best practices dictate separating the "Client" (who wants access) from the "Resource Server" (who hosts the data).
 
-Your FastAPI/Starlette code handles the auth.
-The A2AStarletteApplication from the A2A library handles the A2A protocol.
-Your ADK Agent and Tool definitions focus purely on the business logic of the skills.
-Improved Maintainability & Auditing: Auth logic is consolidated in the middleware, making it easier to update, audit, and test. Changes to your auth policy don't require touching every skill function.
+- **Client App (Web App)**: Used by the Test Client to initiate the login flow. It represents the user/application requesting access.
+- **Resource Server App (API Services)**: Used by the Remote Time Agent to _validate_ tokens. It credentials allow it to call Okta's Introspection API to check if a token is valid and active.
 
-Flexibility: A custom server allows you to easily add other server-level features like:
+### 3. Custom Scope (`agent:time`)
 
-Rate limiting.
-Enhanced logging and monitoring.
-Request/response transformation.
-Token caching strategies to reduce introspection calls to Okta.
+**Why?**
+We use a custom scope to implement fine-grained access control. Merely having a valid token isn't enough; the token must grant the specific privilege to read time data. This prevents over-privileged access.
 
-Run:
+---
+
+## Agent Card Technical Details
+
+The `agent.json` file (also known as the Agent Card) describes the agent's capabilities and security requirements. Here's a breakdown of key components:
+
+### 1. DCR (Dynamic Client Registration) Components
+
+In your `agent.json`, the DCR configuration is handled via a specific **Extension** within the `capabilities` section:
+
+```json
+"extensions": [
+  {
+    "uri": "https://cloud.google.com/marketplace/docs/partners/ai-agents/setup-dcr",
+    "params": {
+      "target_url": "https://marketplace-handler-528009937268.us-central1.run.app/dcr"
+    }
+  }
+]
+```
+
+- **What it does:** This extension signals to a marketplace or client that this agent supports **Dynamic Client Registration**. Instead of manually creating an Okta App for every single user or platform that wants to use your agent, DCR allows the client (the calling software) to programmatically register itself with your Identity Provider (via the `target_url` proxy) to get its own Client ID and Secret on the fly.
+- **`uri`**: A unique identifier for the extension, pointing to the documentation or specification that defines how this DCR handshake works.
+- **`params` -> `target_url`**: This is the critical endpoint. It points to a "DCR Handler" or Proxy (in this case, a Google Cloud Run service). When a platform (like the Google Cloud Marketplace) wants to connect to your agent, it sends a request to this URL to negotiate credentials securely.
+
+### 2. OAuth Scopes
+
+Scopes define the "permissions" the client is asking for. Your agent card lists three specific scopes in the `securitySchemes` and `security` sections:
+
+```json
+"scopes": {
+  "agent:time": "Get the current time from the agent.",
+  "openid": "Basic user profile.",
+  "offline_access": "Refresh token."
+}
+```
+
+- **`openid`**:
+  - **Why:** This is the foundational scope for **OIDC (OpenID Connect)**. It tells Okta "I want to identify the user." Without this, you are just doing raw OAuth2 authorization without a standard identity layer. It returns an ID Token along with the Access Token.
+- **`offline_access`**:
+  - **Why:** This is required to get a **Refresh Token**. Access tokens are short-lived (e.g., 1 hour). If you want the agent client to be able to keep calling your agent tomorrow without forcing the user to log in again, the client needs a Refresh Token to silently get new Access Tokens. This is a requirement for GE.
+- **`agent:time`**:
+  - **Why:** This is your **Custom Functional Scope**. It represents the specific "power" to use the Time Agent.
+  - **Security Principle:** "Least Privilege." If you had another agent that deleted data, you might have a scope like `agent:delete`. By separating them, a client with an `agent:time` token cannot accidentally or maliciously delete data, because the server (your FastAPI middleware) specifically checks for the `agent:time` string in the token.
+
+### 3. Provider URLs (Authorization & Token Endpoints)
+
+These URLs in the `securitySchemes` tell the client _where_ to go to log in:
+
+```json
+"authorizationUrl": "https://trial-6400907.okta.com/oauth2/ausyxkfala0nH5HxE697/v1/authorize",
+"tokenUrl": "https://trial-6400907.okta.com/oauth2/ausyxkfala0nH5HxE697/v1/token"
+```
+
+- **`authorizationUrl`**:
+  - **Function:** The client (e.g., the browser or CLI) opens this URL to show the user the login page.
+  - **The "User" Interaction:** This is where the user enters their username/password and clicks "Allow" to grant the requested scopes.
+- **`tokenUrl`**:
+
+  - **Function:** This is a back-channel API endpoint. Once the user logs in, Okta gives the client a temporary "Code". The client sends that Code to this `tokenUrl` to exchange it for the actual Access Token (and Refresh Token).
+  - **Why it's separate:** The authorization happens in the browser (front-channel), but the token exchange happens server-to-server (back-channel) for better security so the user never sees the raw token.
+
+- **Note on the URL structure**: The segment `ausyxkfala0nH5HxE697` is the **Authorization Server ID**. This confirms you are using a Custom Authorization Server (or a specific instance of one), which is required to support custom scopes like `agent:time`.
+
+## Okta Configuration (Critical)
+
+You need **two** applications and a custom scope in your Okta "default" Authorization Server.
+
+### Prerequisites
+
+- An Okta Developer Account.
+- Access to the **Admin Console**.
+
+### Step 1: Configure Authorization Server & Scope
+
+1.  Navigate to **Security** > **API** > **Authorization Servers**.
+2.  Select the `default` server (ensure it exists and is active).
+3.  **Create Scope**:
+    - Go to the **Scopes** tab.
+    - Click **Add Scope**.
+    - Name: `agent:time`
+    - Display phrase: "Access Time Agent"
+    - Description: "Allows the agent to retrieve time information."
+    - check **Include in public metadata** (Optional but helpful).
+    - Click **Create**.
+
+### Step 2: Configure Access Policy
+
+1.  Still in the `default` Authorization Server, go to the **Access Policies** tab.
+2.  Click **Add Policy** (or edit the `Default Policy`).
+    - Name: "A2A Agent Policy".
+    - Assign to: "All clients" (or specifically select the Client App created in Step 3).
+3.  **Add Rule**:
+    - Click **Add Rule**.
+    - Name: "Allow Time Scope".
+    - Grant types: **Authorization Code**.
+    - Scopes requested: **Any scopes** (or specifically select `agent:time`).
+    - Click **Create Rule**.
+    - _Note: Without this, Okta will refuse to issue the `agent:time` scope._
+
+### Step 3: Create Client App (For the Test Client)
+
+1.  Navigate to **Applications** > **Applications** > **Create App Integration**.
+2.  Sign-in method: **OIDC - OpenID Connect**.
+3.  Application type: **Web Application**.
+4.  Click **Next**.
+5.  **Settings**:
+    - App integration name: `A2A Client Agent`.
+    - Grant type: Check **Authorization Code**.
+    - Sign-in redirect URIs: `http://localhost:8085` (Matches the local server in `test_client_agent/agent.py`).
+    - Assignments: Allow everyone (or specific users).
+6.  Click **Save**.
+7.  **Copy Credentials**: Note the `Client ID` and `Client secret`. You will use these for `OKTA_CLIENT_ID` and `OKTA_CLIENT_SECRET`.
+
+### Step 4: Create Resource Server App (For the Remote Agent)
+
+1.  Navigate to **Applications** > **Applications** > **Create App Integration**.
+2.  Sign-in method: **OIDC - OpenID Connect**.
+3.  Application type: **API Services** (Machine-to-Machine).
+4.  Click **Next**.
+5.  **Settings**:
+    - App integration name: `A2A Resource Server`.
+6.  Click **Save**.
+7.  **Copy Credentials**: Note the `Client ID` and `Client secret`. You will use these for `OKTA_RS_CLIENT_ID` and `OKTA_RS_CLIENT_SECRET`.
+    _Note: For API Services applications acting as Resource Servers for token introspection, direct user assignment is typically not required. Access control for the agent is managed by the scopes present in the access token, which users obtain via the Client App (Step 3)._
+
+---
+
+## Project Setup
+
+### 1. Environment Variables
+
+Create a `.env` file in `remote_a2a/remote_time_agent/.env` AND `test_client_agent/.env` (or set them globally).
+
+**Required Variables:**
+
+```ini
+# Okta Domain (e.g., dev-123456.okta.com)
+OKTA_DOMAIN=your-okta-domain.com
+OKTA_AUTH_SERVER_ID=default
+
+# --- For Remote Agent (Server) ---
+# Credentials from Step 4 (API Services App)
+OKTA_RS_CLIENT_ID=your_resource_server_client_id
+OKTA_RS_CLIENT_SECRET=your_resource_server_client_secret
+
+# --- For Test Client ---
+# Credentials from Step 3 (Web App)
+OKTA_CLIENT_ID=your_client_app_client_id
+OKTA_CLIENT_SECRET=your_client_app_client_secret
+```
+
+### 2. Install Dependencies
+
+Ensure you have `uv` installed.
+
+```bash
+uv sync
+```
+
+---
+
+## Running the Project
+
+You will need two terminal windows.
+
+### Terminal 1: Start the Remote Agent Server
+
+This starts the FastAPI server that protects the agent.
+
+```bash
+uv run uvicorn remote_a2a.remote_time_agent.agent:app --host 0.0.0.0 --port 8001 --reload
+```
+
+- **Verification**: Open `http://localhost:8001/`. You should see `{"message": "Remote Time Agent A2A Server is running with OAuth"}`.
+
+### Terminal 2: Run the Test Client
+
+This starts the CLI agent that will authenticate and talk to the server.
+
+```bash
 uv run test_client_agent/agent.py
-and
-uv run uvicorn agent:app --host 0.0.0.0 --port 8001
+```
+
+**What happens next?**
+
+1.  The CLI will print a URL: `👉 Please open this URL in your browser to authenticate: ...`
+2.  **Open the link**. It will take you to your Okta login page.
+3.  **Log in**.
+4.  Okta will redirect you to `localhost:8085`. You should see "Authorization successful!".
+5.  Return to the terminal. The client has exchanged the code for a token.
+6.  **Interactive Chat**:
+    ```text
+    Starting interactive session: ...
+    You: What time is it in London?
+    Agent: The current time in London is ...
+    ```
+
+Note: please allow for the agent to respond before sending a follow up. This might take a few seconds. Otherwise you will receive wonky output.
+
+---
+
+## Troubleshooting & Gotchas
+
+### 1. "Missing required scope: agent:time"
+
+- **Error**: Server returns 403.
+- **Cause**: The token was issued, but it didn't include the `agent:time` scope.
+- **Fix**:
+  - Ensure you requested the scope (the code does this automatically).
+  - **Check Okta Access Policy (Step 2)**. This is the #1 cause. If the policy doesn't explicitly allow "Any scopes" or `agent:time`, Okta will silently strip it from the token.
+
+### 2. "Token is not active" or Introspection Failed
+
+- **Error**: Server returns 401 or 500 during introspection.
+- **Cause**: The Resource Server credentials (`OKTA_RS_CLIENT_ID`) are incorrect, or the app doesn't have permission to introspect.
+- **Fix**:
+  - Verify `OKTA_RS_CLIENT_ID` and `OKTA_RS_CLIENT_SECRET` in `.env`.
+  - Ensure the Resource Server app is "API Services" type.
+
+### 3. "400 Bad Request" on Login Redirect
+
+- **Cause**: The `redirect_uri` sent by the client (`http://localhost:8085`) does not _exactly_ match the "Sign-in redirect URIs" allowed in the Okta Client App settings.
+- **Fix**: Go to Okta > Applications > [Your Client App] > General and add `http://localhost:8085`.
