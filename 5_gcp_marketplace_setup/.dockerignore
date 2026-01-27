@@ -6,3 +6,5 @@ __pycache__/
 .DS_Store
 test-dcr/
 clients_db.json
+remote_time_agent/
+cpe-isv-partner-experiments-80bda91e2f1c.json

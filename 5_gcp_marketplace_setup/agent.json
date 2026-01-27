@@ -6,7 +6,15 @@
   "protocolVersion": "0.3.0",
   "capabilities": {
     "streaming": false,
-    "pushNotifications": false
+    "pushNotifications": false,
+    "extensions": [
+      {
+        "uri": "https://cloud.google.com/marketplace/docs/partners/ai-agents/setup-dcr",
+        "params": {
+          "target_url": "localhost:8001/dcr"
+        }
+      }
+    ]
   },
   "skills": [
     {

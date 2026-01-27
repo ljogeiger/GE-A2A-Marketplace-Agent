@@ -1,0 +1,5 @@
+remote_time_agent/.env
+__pycache__
+*.pyc
+.git
+.gitignore

@@ -5,4 +5,6 @@ curl -L -X GET https://cloudcommerceprocurement.googleapis.com/v1/providers/cpe-
 # Reset Orders out for approval. Get account id from previous step
 curl -X POST "https://cloudcommerceprocurement.googleapis.com/v1/providers/cpe-isv-partner-experiments/accounts/209b25f0-36b9-4354-aeae-50e317f56afd:reset" -H "Authorization: Bearer $(gcloud auth print-access-token)"   -H "Content-Length: 0"
 
-curl -X POST "https://cloudcommerceprocurement.googleapis.com/v1/providers/cpe-isv-partner-experiments/entitlements/d0230e29-a759-4a41-a3d8-daccd798b8f0:approve" -H "Authorization: Bearer $(gcloud auth print-access-token)"   -H "Content-Length: 0"
+curl -X POST "https://cloudcommerceprocurement.googleapis.com/v1/providers/cpe-isv-partner-experiments/entitlements/18f7b898-4024-4a2f-b9e8-520d661a8801:approve" -H "Authorization: Bearer $(gcloud auth print-access-token)"   -H "Content-Length: 0"
+
+curl -X POST "https://cloudcommerceprocurement.googleapis.com/v1/providers/cpe-isv-partner-experiments/accounts/209b25f0-36b9-4354-aeae-50e317f56afd:approve" -H "Authorization: Bearer $(gcloud auth print-access-token)"   -H "Content-Length: 0"

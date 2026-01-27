@@ -14,3 +14,5 @@ Decisions:
 - json for order + client id instead of db for simplicity
 - for now use localhost PROVIDER_URL and then use Cloud Run deployment endpoint
 -
+
+Add DCR capability to Agent Card

@@ -7,16 +7,17 @@ RUN_SERVICE_ACCOUNT="cloud-run-time-agent-marketpla@cpe-isv-partner-experiments.
 PUBSUB_INVOKER_SA="pub-sub-service-account@cpe-isv-partner-experiments.iam.gserviceaccount.com"
 TOPIC="projects/cloudcommerceproc-prod/topics/cpe-isv-partner-experiments"
 SUB_NAME="marketplace-order-sub"
-SA_KEY_FILE="/Users/lukasgeiger/Desktop/GE_A2A_Marketplace_Agent/4_gcp_marketplace_setup/cpe-isv-partner-experiments-80bda91e2f1c.json"
+SA_KEY_FILE="/Users/lukasgeiger/Desktop/GE_A2A_Marketplace_Agent/5_gcp_marketplace_setup/cpe-isv-partner-experiments-80bda91e2f1c.json"
 
 echo "Deploying Cloud Run service: $SERVICE_NAME..."
 # Note: Ensure that the 'okta-domain' and 'okta-api-token' secrets exist in Secret Manager
 # and the Service Account has 'Secret Manager Secret Accessor' role.
+# Allow unauthenticated because DCR verifies the software statement JWT itself?
 gcloud run deploy $SERVICE_NAME \
   --source . \
   --region $REGION \
   --service-account $RUN_SERVICE_ACCOUNT \
-  --no-allow-unauthenticated \
+  --allow-unauthenticated \
   --set-secrets OKTA_DOMAIN=OKTA_DOMAIN:latest,OKTA_API_TOKEN=OKTA_API_TOKEN:latest \
   --set-env-vars DEFAULT_REDIRECT_URI="https://vertexaisearch.cloud.google.com/oauth-redirect"
 

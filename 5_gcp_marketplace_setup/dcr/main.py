@@ -3,7 +3,7 @@ import time
 import uuid
 import uvicorn
 import httpx
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Request
 from pydantic import BaseModel
 import json
 from typing import Optional, Dict, Any
@@ -17,12 +17,8 @@ from cryptography.hazmat.primitives import serialization
 from dotenv import load_dotenv
 
 # Import shared utilities
-from dcr.utils import (
-    ClientRecord, 
-    find_client_by_order_id, 
-    save_client_mapping, 
-    register_okta_client
-)
+from dcr.utils import (ClientRecord, find_client_by_order_id,
+                       save_client_mapping, register_okta_client)
 
 # Load environment variables from .env file at the very beginning
 load_dotenv()
@@ -32,7 +28,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # --- Configuration ---
-PROVIDER_URL = os.environ.get("PROVIDER_URL", "https://mycompany.com")
+PROVIDER_URL = os.environ.get("PROVIDER_URL", "https://google.com")
 CERT_URL = "https://www.googleapis.com/service_accounts/v1/metadata/x509/cloud-agentspace@system.gserviceaccount.com"
 OKTA_DOMAIN = os.environ.get("OKTA_DOMAIN")
 
@@ -146,10 +142,11 @@ async def validate_jwt(jwt_token: str) -> dict:
 
 # --- DCR API Endpoint ---
 @app.post("/dcr", response_model=DCRResponse)
-async def dcr_handler(reg_request: RegistrationRequest):
+async def dcr_handler(reg_request: RegistrationRequest, request: Request):
     logger.info(f"Received request on /dcr")
+    logger.info(f"Request headers: {request.headers}")
     try:
-        decoded_token = await validate_jwt(reg_request.software_statement)
+        decoded_token = validate_jwt(reg_request.software_statement)
     except HTTPException as e:
         logger.error(f"DCR handler JWT validation error: {e.detail}")
         raise e

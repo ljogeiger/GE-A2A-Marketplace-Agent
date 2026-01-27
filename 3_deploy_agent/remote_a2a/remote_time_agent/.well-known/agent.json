@@ -3,10 +3,22 @@
   "defaultOutputModes": ["application/json"],
   "description": "An agent specialized in retrieving the current time in a specified city.",
   "name": "remote_time_agent",
-  "protocolVersion": "0.3.0",
+  "protocolVersion": "1.0.0",
+  "provider": {
+    "organization": "Google",
+    "url": "https://google.com"
+  },
   "capabilities": {
     "streaming": false,
-    "pushNotifications": false
+    "pushNotifications": false,
+    "extensions": [
+      {
+        "uri": "https://cloud.google.com/marketplace/docs/partners/ai-agents/setup-dcr",
+        "params": {
+          "target_url": "https://marketplace-handler-528009937268.us-central1.run.app/dcr"
+        }
+      }
+    ]
   },
   "skills": [
     {
@@ -33,7 +45,8 @@
           "refreshUrl": "https://trial-6400907.okta.com/oauth2/ausyxkfala0nH5HxE697/v1/token",
           "scopes": {
             "agent:time": "Get the current time from the agent.",
-            "openid": "Basic user profile"
+            "openid": "Basic user profile.",
+            "offline_access": "Refresh token."
           }
         }
       }
@@ -41,7 +54,7 @@
   },
   "security": [
     {
-      "oauth2": ["agent:time", "openid"]
+      "oauth2": ["agent:time", "openid", "offline_access"]
     }
   ]
 }

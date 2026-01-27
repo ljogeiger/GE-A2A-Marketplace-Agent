@@ -1,27 +1,48 @@
 {
-  "defaultInputModes": ["text/plain"],
-  "defaultOutputModes": ["application/json"],
+  "defaultInputModes": [
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "application/json"
+  ],
   "description": "An agent specialized in retrieving the current time in a specified city.",
   "name": "remote_time_agent",
-  "protocolVersion": "0.3.0",
+  "protocolVersion": "1.0.0",
+  "provider": {
+    "organization": "Google",
+    "url": "https://google.com"
+  },
   "capabilities": {
     "streaming": false,
-    "pushNotifications": false
+    "pushNotifications": false,
+    "extensions": [
+      {
+        "uri": "https://cloud.google.com/marketplace/docs/partners/ai-agents/setup-dcr",
+        "params": {
+          "target_url": "remote-time-agent-5pynp3gpqq-uc.a.run.app/dcr"
+        }
+      }
+    ]
   },
   "skills": [
     {
       "id": "time_retrieval",
       "name": "Time Retrieval",
       "description": "Retrieve the current time in a specified city",
-      "tags": ["time", "location"],
+      "tags": [
+        "time",
+        "location"
+      ],
       "security": [
         {
-          "oauth2": ["agent:time"]
+          "oauth2": [
+            "agent:time"
+          ]
         }
       ]
     }
   ],
-  "url": "http://localhost:8001/a2a/remote_time_agent/",
+  "url": "https://remote-time-agent-5pynp3gpqq-uc.a.run.app/a2a/remote_time_agent/",
   "version": "1.0.0",
   "securitySchemes": {
     "oauth2": {
@@ -41,7 +62,10 @@
   },
   "security": [
     {
-      "oauth2": ["agent:time", "openid"]
+      "oauth2": [
+        "agent:time",
+        "openid"
+      ]
     }
   ]
 }

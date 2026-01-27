@@ -24,9 +24,10 @@ The codebase includes a `marketplace_handler.py` service. This service:
 
 1.  **Receives Pub/Sub Events**: Listens for messages on the configured topic via a Push Subscription.
 2.  **Handles Direct DCR**: Processes direct client registration requests using a Signed JWT (Hybrid Handler).
-3.  **Provisions Client**: Registers a new client in Okta associated with the `orderId`.
+3.  **Checks Account Status**: Upon `ACCOUNT_CREATION_REQUESTED`, it verifies if the account is active and approves it if necessary (safety check).
+4.  **Provisions Client**: Registers a new client in Okta associated with the `orderId`.
 
-**Note**: Order approval is handled automatically by the Marketplace settings (Automatic Entitlement/Account Approval), so no manual API call is needed in the code. Note that if you choose automatic approval - entitlements get approved at 12am PT.
+**Note**: Entitlement approval is handled **automatically** by the Marketplace settings (Automatic Entitlement Approval). This typically occurs at **12:00 AM PT** daily. The code does not manually approve entitlements.
 
 ### Prerequisites
 
@@ -112,3 +113,43 @@ Creating the Pub/Sub subscription to the external Marketplace topic requires spe
 
 - [Entitlements Approve](https://docs.cloud.google.com/marketplace/docs/partners/commerce-procurement-api/reference/rest/v1/providers.entitlements/approve)
 - [Account Approval](https://docs.cloud.google.com/marketplace/docs/partners/offers/account-approval)
+
+The following states need to be actioned on through the Patner Procurement API:
+
+- ACCOUNT_ACTIVE -> Approve Account. This needs to happen separately b/c you don't get a notification on account creation.
+  Use this curl command to approve accounts:
+
+```
+curl -X POST "https://cloudcommerceprocurement.googleapis.com/v1/providers/cpe-isv-partner-experiments/accounts/209b25f0-36b9-4354-aeae-50e317f56afd:approve" -H "Authorization: Bearer $(gcloud auth print-access-token)"   -H "Content-Length: 0"
+```
+
+- ENTITLEMENT_OFFER_ACCEPTED -> Approve Entitlement
+
+The pubsub message will have the form of:
+
+```
+Decoded Data: {
+"eventId": "CREATE_ENTITLEMENT-f502acf7-5ada-4f92-a53e-d0c9644099f9",
+"eventType": "ENTITLEMENT_OFFER_ACCEPTED",
+"entitlement": {
+"id": "18f7b898-4024-4a2f-b9e8-520d661a8801",
+"updateTime": "2026-01-21T00:06:19.754732Z",
+"newPlan": "AIAgentEnterprisePlan-P2Y",
+"newProduct": "projects/528009937268/services/service.endpoints.private-cp-1053659.cloud.goog/privateOffers/831e0e7d-6251-476e-9ed6-66dd11e05a66",
+"newOffer": "projects/528009937268/services/service.endpoints.private-cp-1053659.cloud.goog/privateOffers/831e0e7d-6251-476e-9ed6-66dd11e05a66",
+"orderId": "18f7b898-4024-4a2f-b9e8-520d661a8801",
+"entitlementBenefitIds": ["45f87775-101b-43dc-a03d-bad9da21c5d7"]
+},
+"providerId": "cpe-isv-partner-experiments"
+}
+```
+
+For manual approval here is the curl command:
+
+```
+curl -X POST "https://cloudcommerceprocurement.googleapis.com/v1/providers/cpe-isv-partner-experiments/entitlements/18f7b898-4024-4a2f-b9e8-520d661a8801:approve" -H "Authorization: Bearer $(gcloud auth print-access-token)"   -H "Content-Length: 0"
+```
+
+https://docs.cloud.google.com/marketplace/docs/partners/integrated-saas/manage-entitlements#eventtypes
+
+Note that even with automatic activation turned on, the order takes 10-20 minutes to get active.

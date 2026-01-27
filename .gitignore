@@ -12,6 +12,9 @@ wheels/
 # Environment variable files
 .env
 
+# Secrets
+cpe-isv-partner-experiments-80bda91e2f1c.json
+
 # ADK specific files
 .adk
 
