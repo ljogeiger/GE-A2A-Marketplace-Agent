@@ -17,6 +17,8 @@ At the end of Step 5 you will be able to
 
 Video for steps 2 and 3 is [here](https://www.youtube.com/watch?v=7TLacPDYDHM)
 
+[![Watch the video](https://img.youtube.com/vi/7TLacPDYDHM/maxresdefault.jpg)](https://youtu.be/7TLacPDYDHM)
+
 ## Step-by-Step Guide
 
 The project is divided into 6 distinct steps, each building upon the last.
