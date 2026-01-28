@@ -6,6 +6,8 @@ This directory contains the implementation of a Dynamic Client Registration (DCR
 
 The DCR flow involves configuring your Agent to advertise the DCR endpoint and then handling the registration requests from Google.
 
+At the end of this step you will have something that looks like [this](https://www.youtube.com/watch?v=c8IGVX7wlhc).
+
 ### 1. AgentCard Configuration
 
 First, you must declare your DCR endpoint in your `AgentCard` by adding the DCR extension and provider url.
