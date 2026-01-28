@@ -11,10 +11,10 @@ We start with a simple local agent and progressively evolve it into a production
 ## Description Video
 
 At the end of Step 5 you will be able to 
-1: Procure an agent from GCP Agent Marketplace through a Private Offer. Video [!here](https://img.youtube.com/vi/AJI_C_xVo_E/0.jpg)](https://youtu.be/AJI_C_xVo_E)
+1: Procure an agent from GCP Agent Marketplace through a Private Offer. Video [here](https://img.youtube.com/vi/AJI_C_xVo_E/0.jpg)](https://youtu.be/AJI_C_xVo_E)
 2: Register that agent into Gemini Enterprise through Dynamic Client Registration
 3: Use the Agent with end-user credentials using Oauth2.0 Application Code Flow 
-Video for steps 2 and 3 is [!here](https://img.youtube.com/vi/AJI_C_xVo_E/0.jpg)](https://www.youtube.com/watch?v=AJI_C_xVo_E)
+Video for steps 2 and 3 is [here](https://img.youtube.com/vi/AJI_C_xVo_E/0.jpg)](https://www.youtube.com/watch?v=AJI_C_xVo_E)
 
 ## Step-by-Step Guide
 
