@@ -70,8 +70,6 @@ The following table outlines the current feature support and future roadmap for 
 
 # Integrating Your AI Agent with Google Cloud Marketplace: Partner Guide
 
-*The following section contains the official guidelines and technical specifications for integrating with the Google Cloud Marketplace.*
-
 ## Objectives
 This document outlines guidelines for Marketplace partners on how to build and list AI agents on Google Cloud Marketplace as **Agent-as-a-Service (AaaS)** solutions. AaaS offerings provide ready-to-use AI agents that interoperate with other agents and platforms via the standardized **Agent2Agent (A2A)** protocol.
 
