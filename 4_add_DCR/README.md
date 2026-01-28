@@ -8,6 +8,8 @@ The DCR flow involves configuring your Agent to advertise the DCR endpoint and t
 
 At the end of this step you will have something that looks like [this](https://www.youtube.com/watch?v=c8IGVX7wlhc).
 
+[![Watch the video](https://img.youtube.com/vi/c8IGVX7wlhc/maxresdefault.jpg)](https://youtu.be/c8IGVX7wlhc)
+
 ### 1. AgentCard Configuration
 
 First, you must declare your DCR endpoint in your `AgentCard` by adding the DCR extension and provider url.
