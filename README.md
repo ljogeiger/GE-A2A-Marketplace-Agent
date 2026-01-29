@@ -10,7 +10,14 @@ We start with a simple local agent and progressively evolve it into a production
 
 ## Description Video
 
-[Video to be added later]
+At the end of Step 5 you will be able to 
+1. Procure an agent from GCP Agent Marketplace through a Private Offer. Video [here](https://www.youtube.com/watch?v=AJI_C_xVo_E)
+2. Register that agent into Gemini Enterprise through Dynamic Client Registration
+3. Use the Agent with end-user credentials using Oauth2.0 Application Code Flow 
+
+Video for steps 2 and 3 is [here](https://www.youtube.com/watch?v=7TLacPDYDHM)
+
+[![Watch the video](https://img.youtube.com/vi/7TLacPDYDHM/maxresdefault.jpg)](https://youtu.be/7TLacPDYDHM)
 
 ## Step-by-Step Guide
 
@@ -45,25 +52,26 @@ The following table outlines the current feature support and future roadmap for 
 
 | Feature                       | Support | Notes                                                              |
 | :---------------------------- | :------ | :----------------------------------------------------------------- |
-| Dynamic Client Registration (DCR) | Yes     | Fully implemented for Okta.                                        |
-| IDP: Okta                     | Yes     | Current Identity Provider. Other IDPs could be integrated.         |
-| OAuth ADK Agent               | Yes     | Agent integrates with OAuth for secure A2A communication.          |
-| A2A (Agent-to-Agent)          | Yes     | Core functionality, remote agent communication.                    |
-| Marketplace Procurement       | Yes     | Integration with GCP Marketplace Procurement APIs and Pub/Sub.     |
-| Order Database: Firestore     | Yes     | Used for persisting order and client mappings.                     |
-| Private Offers                | Yes     | Supported with DCR and manual credential exchange.                 |
-| Usage-based pricing metering  | No      | Future work: Implement usage tracking and reporting to GCP.        |
-| Subscription throttling       | No      | Future work: Implement rate-limiting based on subscription tiers.  |
-| Deprovisioning of resources   | No      | Future work: Handle Pub/Sub notifications for order cancellation.  |
-| A2UI (Agent-to-UI)            | No      | Future work: Integration with rich UIs for agent interaction.      |
-| Public Offers                 | No      | Current implementation focuses on Private Offers due to DCR scope. |
-| Streaming (A2A Protocol)      | No      | Future work: Implement A2A streaming interaction patterns.         |
+| Dynamic Client Registration (DCR) | :white_check_mark:     | Fully implemented for Okta.                                        |
+| IDP: Okta                     | :white_check_mark:     | Current Identity Provider. Other IDPs could be integrated.         |
+| OAuth ADK Agent               | :white_check_mark:     | Agent integrates with OAuth for secure A2A communication.          |
+| A2A (Agent-to-Agent)          | :white_check_mark:     | Core functionality, remote agent communication.                    |
+| Marketplace Procurement       | :white_check_mark:     | Integration with GCP Marketplace Procurement APIs and Pub/Sub.     |
+| Order Database: Firestore     | :white_check_mark:     | Used for persisting order and client mappings.                     |
+| Private Offers                | :white_check_mark:     | Supported with DCR and manual credential exchange.                 |
+| Agent Runtime: Cloud Run      | :white_check_mark:      | A2A Agent runs on Cloud Run         |
+| Usage-based pricing metering  | :x:      | Future work: Implement usage tracking and reporting to GCP.        |
+| Subscription throttling       | :x:      | Future work: Implement rate-limiting based on subscription tiers.  |
+| Deprovisioning of resources   | :x:      | Future work: Handle Pub/Sub notifications for order cancellation.  |
+| A2UI (Agent-to-UI)            | :x:      | Future work: Integration with rich UIs for agent interaction.      |
+| Public Offers                 | :x:      | Current implementation focuses on Private Offers due to DCR scope. |
+| Streaming (A2A Protocol)      | :x:      | Future work: Implement A2A streaming interaction patterns.         |
+| Agent Runtime: Agent Engine      | :x:      | Future work: Implement Agent Engine as the runtime for the agent         |
+| IdP: Google      | :x:      | Future work: Implement Google as the auth provider. Note: Google does not support DCR flow rn which is why Okta was prioritized         |
 
 ---
 
 # Integrating Your AI Agent with Google Cloud Marketplace: Partner Guide
-
-*The following section contains the official guidelines and technical specifications for integrating with the Google Cloud Marketplace.*
 
 ## Objectives
 This document outlines guidelines for Marketplace partners on how to build and list AI agents on Google Cloud Marketplace as **Agent-as-a-Service (AaaS)** solutions. AaaS offerings provide ready-to-use AI agents that interoperate with other agents and platforms via the standardized **Agent2Agent (A2A)** protocol.
@@ -76,9 +84,9 @@ All products offered through Cloud Marketplace must comply with standard Marketp
 3.  **Authentication/Authorization**: Implement a supported authentication/authorization method (OAuth 2.0).
 4.  **Gemini Enterprise Integration**: Enable seamless integration with Gemini Enterprise, preferably implementing **Dynamic Client Registration (DCR)** for automatic registration.
 5.  **Marketplace Procurement Integration**: Integrate with Marketplace Procurement APIs and Pub/Sub for entitlement lifecycle management.
-6.  **Usage Metering**: Meter usage and/or resource utilization if offering usage-based pricing.
-7.  **Usage Reporting**: Report metered usage to Google's Service Control API.
-8.  **Throttling**: Implement mechanisms to restrict resource utilization.
+6.  (Optional)**Usage Metering**: Meter usage and/or resource utilization if offering usage-based pricing.
+7.  (Optional)**Usage Reporting**: Report metered usage to Google's Service Control API.
+8.  (Optional)**Throttling**: Implement mechanisms to restrict resource utilization.
 
 ## A2A Agent Card
 To list your product, you must provide an **Agent Card** (`agent.json`). Gemini Enterprise relies on this card to:
