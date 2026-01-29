@@ -83,9 +83,9 @@ All products offered through Cloud Marketplace must comply with standard Marketp
 3.  **Authentication/Authorization**: Implement a supported authentication/authorization method (OAuth 2.0).
 4.  **Gemini Enterprise Integration**: Enable seamless integration with Gemini Enterprise, preferably implementing **Dynamic Client Registration (DCR)** for automatic registration.
 5.  **Marketplace Procurement Integration**: Integrate with Marketplace Procurement APIs and Pub/Sub for entitlement lifecycle management.
-6.  **Usage Metering**: Meter usage and/or resource utilization if offering usage-based pricing.
-7.  **Usage Reporting**: Report metered usage to Google's Service Control API.
-8.  **Throttling**: Implement mechanisms to restrict resource utilization.
+6.  (Optional)**Usage Metering**: Meter usage and/or resource utilization if offering usage-based pricing.
+7.  (Optional)**Usage Reporting**: Report metered usage to Google's Service Control API.
+8.  (Optional)**Throttling**: Implement mechanisms to restrict resource utilization.
 
 ## A2A Agent Card
 To list your product, you must provide an **Agent Card** (`agent.json`). Gemini Enterprise relies on this card to:
