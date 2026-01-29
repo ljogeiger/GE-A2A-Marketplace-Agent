@@ -6,9 +6,7 @@ This comprehensive guide outlines the steps to integrate your application with G
 
 ## Architecture Diagram
 
-_[Insert Architecture Diagram Here]_
-
-_(The diagram should show the flow from Marketplace -> Pub/Sub -> Cloud Run -> Firestore, and separately the Agent -> DCR Endpoint -> Okta flow)_
+![Architecture](../images/GE_A2A_Agent_Marketplace_Architecture.png)
 
 ---
 
@@ -52,8 +50,8 @@ To streamline the customer procurement process, it is highly recommended to enab
 
 **How it Works:**
 
--   When automatic approval is enabled, the Google Partner Procurement API automatically approves the customer's account and any associated entitlements upon purchase.
--   This significantly reduces the time from purchase to activation, improving the customer experience.
+- When automatic approval is enabled, the Google Partner Procurement API automatically approves the customer's account and any associated entitlements upon purchase.
+- This significantly reduces the time from purchase to activation, improving the customer experience.
 
 **Configuration in Partner Portal:**
 
