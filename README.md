@@ -67,6 +67,7 @@ The following table outlines the current feature support and future roadmap for 
 | Public Offers                 | :x:      | Current implementation focuses on Private Offers due to DCR scope. |
 | Streaming (A2A Protocol)      | :x:      | Future work: Implement A2A streaming interaction patterns.         |
 | Agent Runtime: Agent Engine      | :x:      | Future work: Implement Agent Engine as the runtime for the agent         |
+| IdP: Google      | :x:      | Future work: Implement Google as the auth provider. Note: Google does not support DCR flow rn which is why Okta was prioritized         |
 
 ---
 
