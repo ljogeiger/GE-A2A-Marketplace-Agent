@@ -52,19 +52,21 @@ The following table outlines the current feature support and future roadmap for 
 
 | Feature                       | Support | Notes                                                              |
 | :---------------------------- | :------ | :----------------------------------------------------------------- |
-| Dynamic Client Registration (DCR) | Yes     | Fully implemented for Okta.                                        |
-| IDP: Okta                     | Yes     | Current Identity Provider. Other IDPs could be integrated.         |
-| OAuth ADK Agent               | Yes     | Agent integrates with OAuth for secure A2A communication.          |
-| A2A (Agent-to-Agent)          | Yes     | Core functionality, remote agent communication.                    |
-| Marketplace Procurement       | Yes     | Integration with GCP Marketplace Procurement APIs and Pub/Sub.     |
-| Order Database: Firestore     | Yes     | Used for persisting order and client mappings.                     |
-| Private Offers                | Yes     | Supported with DCR and manual credential exchange.                 |
-| Usage-based pricing metering  | No      | Future work: Implement usage tracking and reporting to GCP.        |
-| Subscription throttling       | No      | Future work: Implement rate-limiting based on subscription tiers.  |
-| Deprovisioning of resources   | No      | Future work: Handle Pub/Sub notifications for order cancellation.  |
-| A2UI (Agent-to-UI)            | No      | Future work: Integration with rich UIs for agent interaction.      |
-| Public Offers                 | No      | Current implementation focuses on Private Offers due to DCR scope. |
-| Streaming (A2A Protocol)      | No      | Future work: Implement A2A streaming interaction patterns.         |
+| Dynamic Client Registration (DCR) | :white_check_mark:     | Fully implemented for Okta.                                        |
+| IDP: Okta                     | :white_check_mark:     | Current Identity Provider. Other IDPs could be integrated.         |
+| OAuth ADK Agent               | :white_check_mark:     | Agent integrates with OAuth for secure A2A communication.          |
+| A2A (Agent-to-Agent)          | :white_check_mark:     | Core functionality, remote agent communication.                    |
+| Marketplace Procurement       | :white_check_mark:     | Integration with GCP Marketplace Procurement APIs and Pub/Sub.     |
+| Order Database: Firestore     | :white_check_mark:     | Used for persisting order and client mappings.                     |
+| Private Offers                | :white_check_mark:     | Supported with DCR and manual credential exchange.                 |
+| Agent Runtime: Cloud Run      | :white_check_mark:      | A2A Agent runs on Cloud Run         |
+| Usage-based pricing metering  | :x:      | Future work: Implement usage tracking and reporting to GCP.        |
+| Subscription throttling       | :x:      | Future work: Implement rate-limiting based on subscription tiers.  |
+| Deprovisioning of resources   | :x:      | Future work: Handle Pub/Sub notifications for order cancellation.  |
+| A2UI (Agent-to-UI)            | :x:      | Future work: Integration with rich UIs for agent interaction.      |
+| Public Offers                 | :x:      | Current implementation focuses on Private Offers due to DCR scope. |
+| Streaming (A2A Protocol)      | :x:      | Future work: Implement A2A streaming interaction patterns.         |
+| Agent Runtime: Agent Engine      | :x:      | Future work: Implement Agent Engine as the runtime for the agent         |
 
 ---
 
