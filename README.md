@@ -141,7 +141,7 @@ Upon success, return a new Client ID and Secret:
 }
 ```
 
-## End-to-End Data Flow
+## End-to-End Process
 
 1.  **Partner Enrollment**: Become a Google Cloud Build Partner.
 2.  **Agent Development**: Implement A2A protocol, Agent Card, and DCR endpoint.
