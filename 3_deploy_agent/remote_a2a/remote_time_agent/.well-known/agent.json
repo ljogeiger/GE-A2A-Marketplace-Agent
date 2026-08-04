@@ -1,6 +1,10 @@
 {
-  "defaultInputModes": ["text/plain"],
-  "defaultOutputModes": ["application/json"],
+  "defaultInputModes": [
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "application/json"
+  ],
   "description": "An agent specialized in retrieving the current time in a specified city.",
   "name": "remote_time_agent",
   "protocolVersion": "1.0.0",
@@ -10,39 +14,36 @@
   },
   "capabilities": {
     "streaming": false,
-    "pushNotifications": false,
-    "extensions": [
-      {
-        "uri": "https://cloud.google.com/marketplace/docs/partners/ai-agents/setup-dcr",
-        "params": {
-          "target_url": "https://marketplace-handler-528009937268.us-central1.run.app/dcr"
-        }
-      }
-    ]
+    "pushNotifications": false
   },
   "skills": [
     {
       "id": "time_retrieval",
       "name": "Time Retrieval",
       "description": "Retrieve the current time in a specified city",
-      "tags": ["time", "location"],
+      "tags": [
+        "time",
+        "location"
+      ],
       "security": [
         {
-          "oauth2": ["agent:time"]
+          "oauth2": [
+            "agent:time"
+          ]
         }
       ]
     }
   ],
-  "url": "http://localhost:8001/a2a/remote_time_agent/",
+  "url": "https://remote-time-agent-m74hb36eya-uc.a.run.app/a2a/remote_time_agent/",
   "version": "1.0.0",
   "securitySchemes": {
     "oauth2": {
       "type": "oauth2",
       "flows": {
         "authorizationCode": {
-          "authorizationUrl": "https://trial-6400907.okta.com/oauth2/ausyxkfala0nH5HxE697/v1/authorize",
-          "tokenUrl": "https://trial-6400907.okta.com/oauth2/ausyxkfala0nH5HxE697/v1/token",
-          "refreshUrl": "https://trial-6400907.okta.com/oauth2/ausyxkfala0nH5HxE697/v1/token",
+          "authorizationUrl": "https://integrator-4489750.okta.com/oauth2/default/v1/authorize",
+          "tokenUrl": "https://integrator-4489750.okta.com/oauth2/default/v1/token",
+          "refreshUrl": "https://integrator-4489750.okta.com/oauth2/default/v1/token",
           "scopes": {
             "agent:time": "Get the current time from the agent.",
             "openid": "Basic user profile.",
@@ -54,7 +55,11 @@
   },
   "security": [
     {
-      "oauth2": ["agent:time", "openid", "offline_access"]
+      "oauth2": [
+        "agent:time",
+        "openid",
+        "offline_access"
+      ]
     }
   ]
 }

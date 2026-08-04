@@ -41,7 +41,7 @@ DEPLOY_ARGS="$SECRETS_ARGS $ENV_VARS_ARGS"
 # We need to deploy first to let Cloud Run generate the deterministic URL for this service.
 echo "[Step 1/3] Initial Build & Deploy (to generate URL)..."
 gcloud builds submit remote_a2a --tag gcr.io/$PROJECT_ID/$SERVICE_NAME
-gcloud run deploy $SERVICE_NAME --image gcr.io/$PROJECT_ID/$SERVICE_NAME --platform managed --region $REGION --port 8001 --allow-unauthenticated $DEPLOY_ARGS
+gcloud run deploy $SERVICE_NAME --image gcr.io/$PROJECT_ID/$SERVICE_NAME --platform managed --region $REGION --port 8001 --no-invoker-iam-check $DEPLOY_ARGS
 
 # 2. Get the Service URL
 SERVICE_URL=$(gcloud run services describe $SERVICE_NAME --platform managed --region $REGION --format 'value(status.url)')
@@ -90,7 +90,7 @@ except Exception as e:
 # 4. Final Build & Deploy
 echo "[Step 3/3] Final Build & Deploy (with updated agent.json)..."
 gcloud builds submit remote_a2a --tag gcr.io/$PROJECT_ID/$SERVICE_NAME
-gcloud run deploy $SERVICE_NAME --image gcr.io/$PROJECT_ID/$SERVICE_NAME --platform managed --region $REGION --port 8001 --allow-unauthenticated $DEPLOY_ARGS
+gcloud run deploy $SERVICE_NAME --image gcr.io/$PROJECT_ID/$SERVICE_NAME --platform managed --region $REGION --port 8001 --no-invoker-iam-check $DEPLOY_ARGS
 
 echo "=================================================="
 echo "Deployment Complete!"

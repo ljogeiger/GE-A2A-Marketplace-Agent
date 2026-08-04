@@ -236,6 +236,9 @@ class OAuthMiddleware(BaseHTTPMiddleware):
                         "error": "Missing or invalid Authorization header"
                     })
             token = auth_header.split(" ")[1]
+            logger.info("=========== token in OAuthMiddleware ===========")
+            logger.info(f"{token}")
+            logger.info("================================================")
 
             async with httpx.AsyncClient() as client:
                 try:
@@ -249,6 +252,9 @@ class OAuthMiddleware(BaseHTTPMiddleware):
                               RESOURCE_SERVER_CLIENT_SECRET))
                     response.raise_for_status()
                     token_info = response.json()
+                    logger.info("=========== decoded token_info  ================")
+                    logger.info(f"{token_info}")
+                    logger.info("================================================")
 
                     if not token_info.get("active"):
                         return JSONResponse(

@@ -152,13 +152,12 @@ You need **two** applications and a custom scope in your Okta "default" Authoriz
 ### Step 4: Create Resource Server App (For the Remote Agent)
 
 1.  Navigate to **Applications** > **Applications** > **Create App Integration**.
-2.  Sign-in method: **OIDC - OpenID Connect**.
-3.  Application type: **API Services** (Machine-to-Machine).
-4.  Click **Next**.
-5.  **Settings**:
+2.  Sign-in method: **API Services** (Machine-to-Machine).
+3.  Click **Next**.
+4.  **Settings**:
     - App integration name: `A2A Resource Server`.
-6.  Click **Save**.
-7.  **Copy Credentials**: Note the `Client ID` and `Client secret`. You will use these for `OKTA_RS_CLIENT_ID` and `OKTA_RS_CLIENT_SECRET`.
+5.  Click **Save**.
+6.  **Copy Credentials**: Note the `Client ID` and `Client secret`. You will use these for `OKTA_RS_CLIENT_ID` and `OKTA_RS_CLIENT_SECRET`.
     _Note: For API Services applications acting as Resource Servers for token introspection, direct user assignment is typically not required. Access control for the agent is managed by the scopes present in the access token, which users obtain via the Client App (Step 3)._
 
 ---
@@ -194,6 +193,19 @@ Ensure you have `uv` installed.
 ```bash
 uv sync
 ```
+
+### 3. Update Agent Card `agent.json`
+
+Visit your Okta tenant's authorization server discovery URL at
+
+https://Your-Okta-Domain.com/oauth2/default/.well-known/oauth-authorization-server
+
+agent.json -> authorizationUrl: should be the value of `authorization_endpoint`
+
+agent.json -> tokenUrl: should be the value of `token_endpoint`
+
+agent.json -> refreshUrl: should be the same as tokenUrl
+
 
 ---
 
@@ -259,3 +271,22 @@ Note: please allow for the agent to respond before sending a follow up. This mig
 
 - **Cause**: The `redirect_uri` sent by the client (`http://localhost:8085`) does not _exactly_ match the "Sign-in redirect URIs" allowed in the Okta Client App settings.
 - **Fix**: Go to Okta > Applications > [Your Client App] > General and add `http://localhost:8085`.
+
+
+### 4. "Authentication failed: [Errno 48] Address already in use" on starting the test client agent
+
+- **Cause**: The previous listening server is not shut down properly. 
+- **Fix**: You can kill the process that's using port 8085 by running `lsof -ti:8085 | xargs kill -9` in your terminal.
+
+
+### 5. Decode the access token for troubleshooting
+
+The access token is JWT and can be decoded and verified using the `jwt.io` website. Or use pyjwt to decode the header and payload of the JWT. See more [here](https://pyjwt.readthedocs.io/en/latest/usage.html)
+
+```
+$ uv run --with pyjwt python3
+>>> import jwt
+>>> encoded_jwt='paste token here'
+>>> jwt.get_unverified_header(encoded_jwt)
+>>> jwt.decode(encoded_jwt, options={"verify_signature": False})
+```

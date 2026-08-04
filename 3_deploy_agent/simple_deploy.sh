@@ -34,7 +34,7 @@ gcloud run deploy $SERVICE_NAME \
     --platform managed \
     --region $REGION \
     --port 8001 \
-    --allow-unauthenticated \
+    --no-invoker-iam-check \
     --set-secrets="OKTA_DOMAIN=OKTA_DOMAIN:latest,OKTA_AUTH_SERVER_ID=OKTA_AUTH_SERVER_ID:latest,OKTA_RS_CLIENT_ID=OKTA_RS_CLIENT_ID:latest,OKTA_RS_CLIENT_SECRET=OKTA_RS_CLIENT_SECRET:latest" \
     $DEPLOY_ARGS
 

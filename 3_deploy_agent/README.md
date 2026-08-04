@@ -15,15 +15,21 @@ The agent is built using:
 
 ```
 .
-├── deploy.sh               # Main deployment script (handles URL generation & agent.json updates, uses Secret Manager)
-├── simple_deploy.sh        # Simplified deployment script (uses Secret Manager, good for CI/CD)
-└── remote_a2a/             # Application source
-    ├── Dockerfile          # Container definition
-    ├── requirements.txt    # Python dependencies
-    └── remote_time_agent/  # Agent code
-        ├── agent.py        # Main application logic
-        └── .well-known/    # Discovery metadata
-            └── agent.json  # Agent Card served by the application
+├── 3_deploy_agent/
+    ├── deploy.sh               # Main deployment script (handles URL generation & agent.json updates, uses Secret Manager)
+    ├── simple_deploy.sh        # Simplified deployment script (uses Secret Manager, good for CI/CD)
+    └── remote_a2a/             # Application source
+        ├── Dockerfile          # Container definition
+        ├── requirements.txt    # Python dependencies
+        └── remote_time_agent/  # Agent code
+            ├── agent.py        # Main application logic
+            └── .well-known/    # Discovery metadata
+                └── agent.json  # Agent Card served by the application
+    └── test_client_agent/      # client agent
+        ├── agent.py            # core agent logic
+        ├── .env                # environment variables
+        └── pyproject.toml      # Python dependencies for uv
+
 ```
 
 ## Prerequisites
@@ -47,9 +53,15 @@ Both `deploy.sh` and `simple_deploy.sh` are configured to use **Google Secret Ma
 
 For details on how to set these up in Okta and then in Google Secret Manager, refer to the explanation on [why Okta RS Client credentials are needed](#why-okta-rs-client-credentials-are-needed) (note: this is a conceptual link to a previous message, not a markdown anchor).
 
+When you have these values ready, you can save them in a local file named `.env` in the `3_deploy_agent` directory and run `./upload_secrets.sh` to upload them to Google Secret Manager. If you ran into permission errors with the script, run `gcloud auth login` and try again.
+
+
 ### 2. Agent Metadata
 
 The `remote_a2a/remote_time_agent/.well-known/agent.json` file defines the agent's capabilities. The `deploy.sh` script automatically updates the `url` and `target_url` fields in this file to match your deployed Cloud Run instance.
+
+In `agent.json`, the values of `"authorizationUrl"`, `"tokenUrl"`, `"refreshUrl"` should be set to the same as per `2_oauth/remote_a2a/remote_time_agent/.well-known/agent.json`.
+
 
 ## Deployment
 
@@ -64,6 +76,14 @@ Use `deploy.sh` for the initial deployment. This script performs a "two-step" de
 **Usage:**
 
 ```bash
+### obtain default service account name for Cloud Run Service
+gcloud iam service-accounts list --filter="email ~ '-compute@developer.gserviceaccount.com'"
+### grant secret manager secret access to the service account
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+  --member="insert your comput default service account email here" \
+  --role="roles/secretmanager.secretAccessor"
+
+### deploy
 ./deploy.sh
 ```
 
@@ -126,3 +146,12 @@ After deployment, you can verify the service is running:
     curl https://<YOUR-SERVICE-URL>/
     ```
     Should return `{"message": "Remote Time Agent A2A Server is running with OAuth"}`.
+
+3.  **Test client agent with remote A2A agent**:
+    Copy `.env` from `3_deploy_agent/remote_a2a/remote_time_agent/` to `3_deploy_agent/test_client_agent/`.
+
+    Edit `3_deploy_agent/test_client_agent/agent.py` to replace `agent_card_base_url` with your deployed Cloud Run service URL from the `"url"` field of the agent card JSON in `3_deploy_agent/remote_a2a/remote_time_agent/.well-known/agent.json`.
+
+    Run `uv sync` to update dependencies.
+
+    Run `uv run ./agent.py` to start the test client agent. You should be redirected to Okta for authentication first. After authentication, the agent should enter the interactive chat with the remote A2A agent. You can then ask it for the current time in a specified city.
